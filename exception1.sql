@@ -19,8 +19,12 @@ BEGIN
     EXIT;
   END
   WHEN ANY DO
+  BEGIN
     status = 'Druga vrsta napake';
+    EXIT;
   END
+  status = 'Ni napak'; -- TODO: is paraphrased
+  EXIT;
 END
 
 EXECUTE PROCEDURE NovoTrajanje(1, '10:20:30');
