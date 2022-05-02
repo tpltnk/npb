@@ -169,7 +169,7 @@ BEGIN
   END
   WHILE (cnt < n) DO
   BEGIN
-    EXECUTE PROCEDURE NovaTocka INTO :vpisanih;
+    EXECUTE PROCEDURE NovaTocka RETURNING_VALUES :vpisanih;
     cnt = cnt + 1;
     SteviloVpisanih = SteviloVpisanih + vpisanih;
   END
