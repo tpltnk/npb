@@ -116,7 +116,7 @@ BEGIN
       ORDER BY SteviloIzdelkov
       INTO :DID, :ImeDobavitelja, :Naslov, :Telefon, :PST DO
   BEGIN
-    INSERT INTO TopDobavitelji VALUES (:ZapSt, CURRENT_DATE, :DID, :ImeDobavitelja, :Naslov, :Telefon, :PST);
+    INSERT INTO TopDobavitelji VALUES (:ZapSt, CAST('NOW' AS DATE), :DID, :ImeDobavitelja, :Naslov, :Telefon, :PST);
     ZapSt = ZapSt + 1;
   END
 END
