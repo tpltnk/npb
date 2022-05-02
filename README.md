@@ -2,6 +2,8 @@
 
 ## Notes
 
+DBMS used is Firebird, sometimes MySQL
+
 1. Files `P_*` contain procedures
 2. Files `T_*` contain triggers
 
