@@ -34,11 +34,13 @@ AS
   DECLARE VARIABLE DDV INT;
   DECLARE VARIABLE PosamezniIzpis VARCHAR(1000);
 BEGIN
+  Izpis = 'Izpis';
+  Izpis = Izpis || '\n==================\n';
   FOR SELECT ddv FROM Izdelek GROUP BY DDV INTO :DDV DO
   BEGIN
-    Izpis = 'Stopnja DDV ' || DDV || '%';
+    Izpis = Izpis || 'Stopnja DDV ' || DDV || '%';
     Izpis = Izpis || '\n================\n';
-    FOR SELECT Izpis FROM IzpisIzdelkov(DDV) INTO PosamezniIzpis DO
+    FOR SELECT Izpis FROM IzpisIzdelkov(DDV) INTO :PosamezniIzpis DO
     BEGIN
       Izpis = Izpis || PosamezniIzpis || '\n';
     END
