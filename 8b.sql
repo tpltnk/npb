@@ -21,9 +21,10 @@ AS
   DECLARE VARIABLE ime_izdelka VARCHAR(30);
   DECLARE VARIABLE cena FLOAT;
 BEGIN
+  Izpis = '';
   FOR SELECT ime_izdelka, cena FROM Izdelek WHERE DDV = :DDV INTO :ime_izdelka, :cena DO
   BEGIN
-    Izpis = ime_izdelka || ' ' || cena || ' ' || cena * DDV;
+    Izpis = Izpis || ime_izdelka || ' ' || cena || ' ' || cena * DDV || '\n';
     SUSPEND;
   END
 END
