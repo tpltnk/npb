@@ -75,9 +75,9 @@ END
 
 EXECUTE PROCEDURE NoveTocke(RAND() * 42);
 
-create procedure tockepokvadrantih
-returns (izpis varchar(10000))
-aS
+CREATE PROCEDURE TockePoKvadrantih 
+RETURNS (izpis varchar(10000))
+AS
   DECLARE VARIABLE x INT;
   DECLARE VARIABLE y INT;
   DECLARE VARIABLE barva CHAR(10);
