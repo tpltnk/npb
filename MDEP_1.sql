@@ -1,4 +1,7 @@
 CREATE EXCEPTION TrajanjeException 'Napaka v trajanju posnetka';
+
+SET TERM !! ;
+
 CREATE PROCEDURE NovoTrajanje (PID INT, NovoTrajanje TIME)
 RETURNS (status CHAR(30))
 AS
@@ -24,7 +27,8 @@ BEGIN
     EXIT;
   END
   status = 'Ni napak'; -- TODO: is paraphrased
-  EXIT;
-END
+END !!
+
+SET TERM ; !!
 
 EXECUTE PROCEDURE NovoTrajanje(1, '10:20:30');

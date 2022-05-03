@@ -14,12 +14,14 @@ V primeru, da uporabnik vnese priimek avtorja le z veliko začetnico, naj sprož
 
 CREATE EXCEPTION SamoZVelikoZacetnico 'Priimek avtorja vpiši z velikimi črkami';
 
+SET TERM !! ;
+
 CREATE FUNCTION JeVelikaZacetnica (Zacetnica CHAR(1))
 RETURNS BOOLEAN
 AS
 BEGIN
   RETURN (Zacetnica > 'A' AND Zacetnica < 'Z') OR Zacetnica = 'Š' OR Zacetnica = 'Č' OR Zacetnica = 'Ž';
-END
+END !!
 
 CREATE TRIGGER PriimkiZVelikimiCrkami FOR Avtor
 ACTIVE BEFORE INSERT OR UPDATE
@@ -29,17 +31,21 @@ AS
 BEGIN
   Zacetnica = SUBSTRING(NEW.Priimek FROM 1 FOR 1);
   -- non-ascii incompatible
-  IF (EXECUTE FUNCTION JeVelikaZacetnica (Zacetnica)) THEN
+  IF (SELECT JeVelikaZacetnica(Zacetnica) FROM RDB$DATABASE) THEN
   BEGIN
     EXCEPTION SamoZVelikoZacetnico;
   END
   NEW.Priimek = UPPER(NEW.Priimek);
-END
+END !!
+
+SET TERM ; !!
 
 INSERT INTO Avtor (AvtorID, Ime, Priimek) VALUES (1, 'Jožefff', 'kvadrat');
 UPDATE Avtor SET Ime = 'Peppa' Priimek = 'Pig' WHERE AvtorID = 1;
 
 ALTER TRIGGER PriimkiZVelikimiCrkami INACTIVE;
+
+SET TERM !! ;
 
 CREATE TRIGGER PriimkiZVelikimiCrkami_v2 FOR Avtor
 ACTIVE BEFORE INSERT OR UPDATE
@@ -57,7 +63,9 @@ BEGIN
   BEGIN
     NEW.Priimek = UPPER(NEW.Priimek);
   END
-END
+END !!
+
+SET TERM ; !!
 
 UPDATE Avtor SET Ime = '___' Priimek = 'neki' WHERE AvtorID = 1;
 INSERT INTO Avtor VALUES (2, 'A', 'B');
@@ -79,6 +87,8 @@ Predpostavimo, da med posnetki na CD ni presledkov.
 
 CREATE EXCEPTION CDPoln 'CD je poln (10 posnetkov) ';
 
+SET TERM !! ;
+
 CREATE TRIGGER Najvec10VCD FOR Vsebina
 ACTIVE BEFORE INSERT OR UPDATE
 POSITION 2
@@ -86,11 +96,11 @@ AS
 BEGIN
   IF ((SELECT COUNT(*)
        FROM Vsebina v
-       WHERE NEW.CDID = v.CDID) == 10) THEN
+       WHERE NEW.CDID = v.CDID) = 10) THEN
   BEGIN
     EXCEPTION CDPoln;
   END
-END
+END !!
 
 -- Test
 EXECUTE BLOCK
@@ -102,9 +112,13 @@ EXECUTE BLOCK
       INSERT INTO Vsebina VALUES (1, :cnt);
       cnt = cnt + 1;
     END
-  END
+  END !!
+
+SET TERM ; !!
 
 CREATE EXCEPTION CDPolnT 'CD je poln (60 min)'
+
+SET TERM !! ;
 
 CREATE TRIGGER Najvec60min FOR Vsebina
 ACTIVE BEFORE INSERT OR UPDATE
@@ -118,7 +132,7 @@ BEGIN
   BEGIN
     EXCEPTION CDPolnT;
   END
-END
+END !!
 
 -- Test (lazy)
 
@@ -145,6 +159,8 @@ BEGIN
   BEGIN
     NEW.Opombe = 'UGODNO: ' || NEW.Opombe;
   END
-END
+END !!
+
+SET TERM ; !!
 
 -- Test (lazy)

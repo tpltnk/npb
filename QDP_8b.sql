@@ -15,6 +15,8 @@ ime_izdelkan Cenan Cenan_z_DDV
 Napišite klic shranjene procedure.
  */
 
+SET TERM !! ;
+
 CREATE PROCEDURE IzpisIzdelkov (DDV INT)
 RETURNS (Izpis VARCHAR(1000))
 AS
@@ -27,7 +29,7 @@ BEGIN
     Izpis = Izpis || ime_izdelka || ' ' || cena || ' ' || cena * DDV || '\n';
     SUSPEND;
   END
-END
+END !!
 
 CREATE PROCEDURE IzpisIzdelkovPoDDV
 RETURNS (Izpis VARCHAR(10000))
@@ -46,6 +48,8 @@ BEGIN
       Izpis = Izpis || PosamezniIzpis || '\n';
     END
   END
-END
+END !!
+
+SET TERM ; !!
 
 EXECUTE PROCEDURE IzpisIzdelkovPoDDV; 

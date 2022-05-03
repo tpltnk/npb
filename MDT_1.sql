@@ -11,6 +11,8 @@ CREATE TABLE Izbrisani (
   PRIMARY KEY (TID)
 );
 
+SET TERM !! ;
+
 CREATE TRIGGER OnDeleteTekmovalec
 FOR Tekmovalec
 ACTIVE AFTER DELETE
@@ -18,5 +20,7 @@ AS
 BEGIN
   INSERT INTO Izbrisani (TID, Ime, Priimek, ImeUporabnika, DatumCasBrisanja)
          VALUES (OLD.TID, OLD.Ime, OLD.Priimek, CURRENT_USER, CURRENT_DATETIME);
-END
+END !!
+
+SET TERM ; !!
 

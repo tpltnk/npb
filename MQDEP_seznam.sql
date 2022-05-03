@@ -22,6 +22,8 @@ CREATE TABLE Seznam (
   PRIMARY KEY (ZapSt)
 );
 
+SET TERM !! ;
+
 CREATE PROCEDURE PrepisiVSeznam (Priimek CHAR(30))
 RETURNS (Dodanih CHAR(30))
 AS
@@ -45,5 +47,6 @@ BEGIN
     ZapSt = ZapSt + 1;
   END
   Dodanih = 'Dodanih ' || CAST(DodanihZapisov AS CHAR(4)) || ' zapisov.'; 
-END
+END !!
 
+SET TERM ; !!

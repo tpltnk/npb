@@ -5,14 +5,18 @@ Pri kršitvi tega poslovnega pravila, naj se sproži izjema prepovedan_updateTek
 
 CREATE EXCEPTION prepovedan_updateTekmovalca 'Starost tekmovalca lahko le povečate za 1';
 
+SET TERM !! ;
+
 CREATE TRIGGER updateTekmovalca
 FOR Tekmovalec
 ACTIVE BEFORE UPDATE
 AS
-  DECLARE VARIABLE starostna_razlika INT DEFAULT ABS(OLD.starost - NEW.starost)
+  DECLARE VARIABLE starostna_razlika INT DEFAULT ABS(OLD.starost - NEW.starost) -- requires research
 BEGIN
   IF (starostna_razlika > 1) THEN
   BEGIN
     EXCEPTION prepovedan_updateTekmovalca;
   END
-END
+END !!
+
+SET TERM ; !!

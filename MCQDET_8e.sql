@@ -9,6 +9,8 @@ b)	Trigger testirajte 2x:
 
 CREATE EXCEPTION prevec_izdelkov 'V tej kategoriji je kvota izdelkov zapolnjena';
 
+SET TERM !! ;
+
 CREATE TRIGGER Najvec4Izdelke FOR Izdelek
 ACTIVE BEFORE INSERT
 POSITION 8
@@ -19,11 +21,13 @@ BEGIN
   IF ((SELECT COUNT(*)
        FROM Kategorija k
        INNER JOIN Izdelek i ON i.KategorijaID = k.ID
-       WHERE k.ID = :katID) == 4) THEN
+       WHERE k.ID = :katID) = 4) THEN
   BEGIN
     EXCEPTION prevec_izdelkov;
   END
-END;
+END !!
+
+SET TERM ; !!
 
 INSERT INTO Izdelek VALUES (8,'Makaroni',1.80,100,3);
 INSERT INTO Izdelek VALUES (9,'Jušni reznaci',2.30,100,3);  
@@ -43,19 +47,23 @@ b)	Sprožilec testirajte 3x:
 
 CREATE EXCEPTION zamrznjena_cena 'Cena izdelka je zamrznjena.';
 
+SET TERM !! ;
+
 CREATE TRIGGER ZamrznjeneCene FOR Izdelek
 ACTIVE BEFORE UPDATE
 POSITION 9
 AS
 BEGIN
-  IF ((SELECT ddv FROM Kategorija k WHERE k.KategorijaID = NEW.KategorijaID) == 8) THEN
+  IF ((SELECT ddv FROM Kategorija k WHERE k.KategorijaID = NEW.KategorijaID) = 8) THEN
   BEGIN
     IF (NEW.Cena > OLD.Cena) THEN
     BEGIN
       EXCEPTION zamrznjena_cena;
     END
   END
-END;
+END !!
+
+SET TERM ; !!
 
 -- Test (lazy but TODO)
 
@@ -82,13 +90,17 @@ CREATE TABLE LogIzdelkov (
   IID INT NOT NULL
 );
 
+SET TERM !! ;
+
 CREATE TRIGGER NovIzdelek FOR Izdelek
 ACTIVE AFTER INSERT
 POSITION 10
 AS
 BEGIN
   INSERT INTO LogIzdelkov VALUES (CURRENT_USER, CURRENT_DATE, CURRENT_TIME, OLD.IzdelekID);
-END
+END !!
+
+SET TERM ; !!
 
 INSERT INTO Izdelek VALUES (9,'Cocta',1.80,300,1);
 INSERT INTO Izdelek VALUES (10,'Srebrna Radgonska Penina',8.40,300,2);
@@ -117,6 +129,8 @@ c)	Izpišite seznam vseh sprožilcev v PB.
 
 CREATE EXCEPTION prepovedano_brisanje 'Brisanje izdelkov dobaviteljev iz Ljubljane ni dovoljeno.';
 
+SET TERM !! ;
+
 CREATE TRIGGER NeIzLj FOR Izdelek
 ACTIVE BEFORE DELETE
 POSITION 11
@@ -124,11 +138,13 @@ AS
   DECLARE dobID INT;
 BEGIN
   dobID = SELECT DobaviteljID FROM Izdelek WHERE IzdelekID = OLD.IzdelekID;
-  IF ((SELECT FIRST 1 lokacija FROM Dobavitelj WHERE DobaviteljID = dobID) == 'Ljubljana') THEN
+  IF ((SELECT FIRST 1 lokacija FROM Dobavitelj WHERE DobaviteljID = :dobID) LIKE '%Ljubljana%') THEN
   BEGIN
     EXCEPTION prepovedano_brisanje;
   END
-END
+END !!
+
+SET TERM ; !!
 
 DELETE FROM Izdelek WHERE naslov = 'Srebrna Radgonska Penina'; -- ne
 DELETE FROM Izdelek WHERE naslov = 'Domači rezanci';           -- ja (untested)

@@ -20,7 +20,11 @@ AS
   DECLARE cena FLOAT;
   DECLARE counter INT DEFAULT 0;
 BEGIN
-  FOR SELECT ime_izdelka, cena FROM Izdelek ORDER BY cena DESC INTO :ime_izdelka, :cena DO
+  FOR SELECT ime_izdelka, cena 
+      FROM Izdelek 
+      ORDER BY cena DESC 
+      INTO :ime_izdelka, :cena 
+      DO
   BEGIN
     Podatki = CAST(counter AS CHAR(1)) || '.' || ime_izdelka || CAST(cena AS CHAR(9));
     SUSPEND;
@@ -43,26 +47,33 @@ V primeru prevelike spremembe stopnje DDV, naj procedura v podatku Ime izpiše '
 Z ustreznimi klici procedure testirajte preverjanje dovoljene meje za spremembo DDV.
 */
 
+SET TERM !! ;
+
 CREATE FUNCTION CenaZDDV (cena FLOAT, ddv FLOAT)
 RETURNS FLOAT
 AS
 BEGIN
   RETURN cena + cena * dvv;
-END
+END !!
 
 CREATE PROCEDURE SpremembaCene (ime_izdelka CHAR(20), n FLOAT)
 RETURNS (ime CHAR(20), sprememba FLOAT)
 AS
   DECLARE cena FLOAT;
-  DECLARE 
+  DECLARE cena_z_ddv FLOAT;
 BEGIN
-  IF ((SELECT COUNT(*) FROM Izdelek WHERE ime_izdelka = :ime_izdelka) != 0) THEN
+  IF ((SELECT COUNT(*) FROM Izdelek WHERE ime_izdelka = :ime_izdelka) <> 0) THEN
   BEGIN
     ime = :ime_izdelka;
     cena = SELECT FIRST 1 cena FROM Izdelek WHERE ime_izdelka = :ime_izdelka;
-    sprememba = EXECUTE FUNCTION CenaZDDV(EXECUTE FUNCTION CenaZDDV(cena, 0.2), n) - EXECUTE FUNCTION CenaZDDV(cena, 0.2);
+    cena_z_ddv = SELECT CenaZDDV(:cena, 0.2) FROM RDB$DATABASE;
+    sprememba = CAST(
+      (SELECT CenaZDDV(:cena_z_ddv, :n) FROM RDB$DATABASE - :cena_z_ddv)
+      AS CHAR(5)
+    );
   END
-END
+END !!
+
 
 /*
 4.	naloga
@@ -84,8 +95,8 @@ AS
   DECLARE C1 FLOAT;
   DECLARE C2 FLOAT;
 BEGIN
-  IF ((SELECT COUNT(*) FROM Izdelek WHERE IzdelekID = I1) != 0 AND
-      (SELECT COUNT(*) FROM Izdelek WHERE IzdelekID = I2) != 0) THEN
+  IF ((SELECT COUNT(*) FROM Izdelek WHERE IzdelekID = I1) <> 0 AND
+      (SELECT COUNT(*) FROM Izdelek WHERE IzdelekID = I2) <> 0) THEN
   BEGIN
     C1 = SELECT FIRST 1 cena FROM Izdelek WHERE IzdelekID = I1;
     C2 = SELECT FIRST 1 cena FROM Izdelek WHERE IzdelekID = I2;
@@ -104,5 +115,6 @@ BEGIN
       Podatki = 'Ceni sta enaki';
     END
   END
-END
+END !! 
 
+SET TERM ; !!

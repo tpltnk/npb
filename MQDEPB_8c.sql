@@ -32,6 +32,8 @@ CREATE EXCEPTION KategorijaNeObstaja 'Ne obstaja ustrezna kategorija';
 CREATE EXCEPTION DobaviteljNeObstaja 'Ne obstaja ustrezni dobavitelj';
 CREATE EXCEPTION DrugaNapaka 'Napaka pri dodanju';
 
+SET TERM !! ;
+
 CREATE PROCEDURE VnosIzdelka (IzdelekID INT, ime_izdelka CHAR(20), cena FLOAT, ddv FLOAT, KategorijaID INT, DobaviteljID INT)
 AS
 BEGIN
@@ -50,12 +52,16 @@ BEGIN
   BEGIN
     EXCEPTION DrugaNapaka;
   END
-END
+END !!
+
+SET TERM ; !!
 
 EXECUTE PROCEDURE VnosIzdelka (0, 'Copati1', 5.99, 22.0, 1, 1);
 EXECUTE PROCEDURE VnosIzdelka (0, 'Copati1', 5.99, 22.0, 1, 1);
 EXECUTE PROCEDURE VnosIzdelka (1, 'Copati2', 4.20, 69.0, -30, 1);
 EXECUTE PROCEDURE VnosIzdelka (1, 'Copati3', 3.33, 33.3, 1, -40);
+
+SET TERM !! ;
 
 CREATE PROCEDURE BrisanjeNakljucnegaIzdelka
 RETURNS (Obvestilo CHAR(40))
@@ -75,7 +81,7 @@ BEGIN
     EXIT;
   END
   Obvestilo = 'Izbrisan izdelek s šifro ' || CAST(ID AS CHAR(10)) || '.';
-END
+END !!
 
 EXECUTE BLOCK
   AS
@@ -85,7 +91,9 @@ EXECUTE BLOCK
     BEGIN
       EXECUTE PROCEDURE BrisanjeNakljucnegaIzdelka RETURNING_VALUES :Status;
     END
-  END
+  END !!
+
+SET TERM ; !!
 
 -- TopDobavitelji(Zaporedna_stevilka, Datum, DID:Nà, ImeDobavitelja:A20, Naslov:A20, Telefon:A15, PST:N)
 CREATE TABLE TopDobavitelji (
@@ -100,6 +108,8 @@ CREATE TABLE TopDobavitelji (
   FOREIGN KEY (DID) REFERENCES Dobavitelji (DID),
 );
 
+SET TERM !! ;
+
 CREATE PROCEDURE UpdateTopDobavitelji (n INT)
 AS
   DECLARE VARIABLE DID INT;
@@ -109,17 +119,21 @@ AS
   DECLARE VARIABLE PST INT;
   DECLARE VARIABLE ZapSt INT DEFAULT 1;
 BEGIN
-  FOR SELECT FIRST :n DID, ImeDobavitelja, Naslov, Telefon, PST, COUNT(*) AS SteviloIzdelkov
+  FOR SELECT FIRST :n d.DID, d.ImeDobavitelja, d.Naslov, d.Telefon, d.PST, COUNT(*) AS SteviloIzdelkov
       FROM Dobavitelji d
       INNER JOIN Izdelek i ON i.DobaviteljID = d.DID
       GROUP BY d.DID
-      ORDER BY SteviloIzdelkov
+      ORDER BY SteviloIzdelkov DESC
       INTO :DID, :ImeDobavitelja, :Naslov, :Telefon, :PST DO
   BEGIN
+    --                                             CURRENT_DATE
+    --                                         -------------------
     INSERT INTO TopDobavitelji VALUES (:ZapSt, CAST('NOW' AS DATE), :DID, :ImeDobavitelja, :Naslov, :Telefon, :PST);
     ZapSt = ZapSt + 1;
   END
-END
+END !!
+
+SET TERM ; !!
 
 EXECUTE PROCEDURE UpdateTopDobavitelji;
 SELECT * FROM TopDobavitelji;

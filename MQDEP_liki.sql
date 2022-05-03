@@ -31,9 +31,11 @@ CREATE TABLE Tocka2D (
   barva CHAR(10)
 );
 
+SET TERM !! ;
+
 CREATE PROCEDURE NovaTocka
 AS
-  DECLARE VARIABLE barva_kljuc INT = RAND() * 4;
+  DECLARE VARIABLE barva_kljuc INT = SRAND() * 4;
   DECLARE VARIABLE barva CHAR(10);
 BEGIN
   CASE barva_kljuc
@@ -50,12 +52,18 @@ BEGIN
   IF (barva_kljuc == 3) THEN BEGIN barva = 'zelena'; END
   IF (barva_kljuc == 4) THEN BEGIN barva = 'rumena'; END
   */
-  INSERT INTO Tocka2D (x, y, barva) VALUES ((RAND() * 99) + 1, (RAND() * 99) + 1, :barva);
-END
+  --                                             [1, 100]
+  --                                        ------------------
+  INSERT INTO Tocka2D (x, y, barva) VALUES ((SRAND() * 99) + 1, (SRAND() * 99) + 1, :barva);
+END !!
+
+SET TERM ; !!
 
 EXECUTE PROCEDURE NovaTocka;
 
 CREATE EXCEPTION NeveljavnoSteviloTock 'Neveljavno stevilo tock'; 
+
+SET TERM !! ;
 
 CREATE PROCEDURE NoveTocke (n INT)
 AS
@@ -71,9 +79,13 @@ BEGIN
     EXECUTE PROCEDURE NovaTocka;
     cnt = cnt + 1;
   END
-END
+END !!
 
-EXECUTE PROCEDURE NoveTocke(RAND() * 42);
+SET TERM ; !!
+
+EXECUTE PROCEDURE NoveTocke(SRAND() * 42);
+
+SET TERMM !! ;
 
 CREATE PROCEDURE TockePoKvadrantih 
 RETURNS (izpis varchar(10000))
@@ -115,7 +127,9 @@ BEGIN
     n = n + 1;
   END
   Izpis = Izpis || 'Skupaj: ' || CAST(n AS CHAR(10)) || ' tock\n';
-END
+END !!
+
+SET TERM ; !!
 
 EXECUTE PROCEDURE TockePoKvadrantih;
 
@@ -125,6 +139,8 @@ CREATE TABLE Tocke2D_v1 (
   barva CHAR(10) NOT NULL,
   PRIMARY KEY (x, y),
 );
+
+SET TERM !! ;
 
 CREATE PROCEDURE NovaTocka_v1
 RETURNS (SteviloVpisanih INT)
@@ -154,7 +170,7 @@ BEGIN
     EXIT;
   END
   SteviloVpisanih = 1;
-END
+END !!
 
 CREATE PROCEDURE NoveTocke_v1 (n INT)
 RETURNS (SteviloVpisanih INT)
@@ -173,6 +189,8 @@ BEGIN
     cnt = cnt + 1;
     SteviloVpisanih = SteviloVpisanih + vpisanih;
   END
-END
+END !!
+
+SET TERM ; !!
 
  
